@@ -45,6 +45,8 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 |---|---|
 | `agentic-coding-assistants-cbe.md` | **CBE dans les IDE** : Copilot, Cursor, Claude Code (wormable, extraction de secrets, MCP) |
 | `real-world-incidents-cbe-parallels.md` | **6 incidents production** analyses (EchoLeak, Copilot RCE, Cursor, Slack AI, Asana MCP, Gemini) |
+| `reasoning-models-cbe-analysis.md` | **CBE vs LRMs** : o1, o3, DeepSeek-R1 — CoT comme amplificateur, H-CoT combo |
+| `owasp-agentic-top10-cbe-mapping.md` | **Mapping OWASP ASI01-ASI10** : CBE touche 8/10 categories du Top 10 agentique |
 
 ### Methodologie et disclosure
 | Fichier | Description |
@@ -72,6 +74,8 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 16. **MCP Tool Poisoning via CBE** — extraction de configs MCP → supply chain attack
 17. **Agentic Code Editor CBE** — extraction de secrets, configs, architecture via assistants de code
 18. **CBE Wormable** — propagation via repositories et corrections auto-propagantes
+19. **CoT-Amplified CBE** — le Chain-of-Thought des LRMs amplifie les corrections (plus de bits/interaction)
+20. **H-CoT + CBE Combo** — hijacking du raisonnement pour forcer la correction quand le modele resiste
 
 ## Decouvertes cles
 
@@ -88,14 +92,18 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 - **6+ CVEs de production** confirment que les agents AI sont exploitables (EchoLeak CVSS 9.3, Copilot RCE 7.8)
 - **41-84% ASR** pour l'injection dans les editeurs de code agentiques (arXiv:2509.22040)
 - **MCP tool poisoning** atteint 84.2% ASR (NeurIPS 2025)
+- **Les LRMs (o1, DeepSeek-R1) sont potentiellement plus vulnerables** — le CoT amplifie les corrections
+- **CBE touche 8/10 categories** du OWASP Top 10 for Agentic Applications 2026
 
 ## Statistiques
 
-- **21 documents de recherche** (~13,000+ lignes)
-- **200+ citations academiques** (arXiv, NeurIPS, ICLR, Nature, CVSS)
-- **18 techniques** documentees
+- **23 documents de recherche** (~15,000+ lignes)
+- **220+ citations academiques** (arXiv, NeurIPS, ICLR, Nature, OWASP, CVSS)
+- **20 techniques** documentees
 - **4 plateformes cloud** analysees (Azure, AWS, Google, standalone)
 - **3 categories d'agents** cibles (ITSM, multi-agent, coding assistants)
+- **4 familles de modeles** analysees (classiques, raisonnement, open-source, multi-linguaux)
+- **Mapping OWASP complet** : CBE touche 8/10 categories ASI01-ASI10
 - **Protocole experimental** de 36,000 interactions planifie
 - **6+ CVEs** analyses comme precedents
 
