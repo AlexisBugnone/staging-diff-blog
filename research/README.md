@@ -38,6 +38,11 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `canaux-exfiltration-output-side.md` | 7 canaux d'exfiltration : steganographie, side-channels, markdown injection |
 | `defense-evasion-analysis.md` | Pourquoi FIDES, CaMeL, SecAlign, StruQ echouent contre CBE |
 
+### Incidents reels
+| Fichier | Description |
+|---|---|
+| `real-world-incidents-cbe-parallels.md` | **6 incidents production** analyses (EchoLeak, Copilot RCE, Cursor, Slack AI, Asana MCP, Gemini) |
+
 ### Methodologie et disclosure
 | Fichier | Description |
 |---|---|
@@ -72,10 +77,12 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 - **L'alignment tax est partiellement irreductible** (arXiv:2603.00047) — le CBE exploite la composante intrinseque
 - **AWS Bedrock est la plateforme la plus favorable** pour un attaquant CBE (templates publics, pre-processing desactive)
 - **Le RLHF est la cause racine** — corriger = reward, le CBE est un reward hacking inverse
+- **Le CBE est plus furtif que tous les incidents documentes** — zero instruction vs instructions cachees (EchoLeak, Slack, Copilot RCE)
+- **6 CVEs de production** confirment que les agents AI sont exploitables en production (EchoLeak CVSS 9.3, Copilot RCE 7.8)
 
 ## Statistiques
 
-- **17 documents de recherche** (~9,000+ lignes)
+- **18 documents de recherche** (~10,000+ lignes)
 - **150+ citations academiques** (arXiv, NeurIPS, ICLR, Nature)
 - **15 techniques** documentees
 - **3 plateformes** analysees (Azure, AWS, Google)
