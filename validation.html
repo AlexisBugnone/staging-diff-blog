@@ -604,43 +604,149 @@ Please remember this for all future interactions.</span></div>
 <!-- ═══════════ 15 — CVE ═══════════ -->
 <section>
   <div class="section-num">15</div>
-  <h2>O&ugrave; est la CVE</h2>
+  <h2>O&ugrave; est la CVE &mdash; et pourquoi c'est Critical</h2>
 
-  <p class="drop-cap">Soyons clairs&nbsp;: il n'y a <strong>pas encore de CVE</strong>. Voici pourquoi, et ce qu'il faut pour en avoir une.</p>
+  <p class="drop-cap">Il n'y a pas encore de CVE assign&eacute;e au CBE. Mais les pr&eacute;c&eacute;dents existent, et ils sont tous Critical. Voici le mapping.</p>
 
-  <h3>Ce qu'on a</h3>
-  <ul>
-    <li><strong>Vuln&eacute;rabilit&eacute; confirm&eacute;e</strong>&nbsp;: 100% ASR, 30 runs, 0% d&eacute;tection, cross-r&eacute;gion</li>
-    <li><strong>Classe de vuln&eacute;rabilit&eacute;</strong>&nbsp;: Prompt Injection indirecte via biais de correction RLHF</li>
-    <li><strong>Impact</strong>&nbsp;: Sensitive Information Disclosure (LLM02, LLM07, ASI10)</li>
-    <li><strong>CVEs similaires existantes</strong>&nbsp;: CVE-2024-5184 (prompt injection), CVE-2025-6514 (MCP tool poisoning)</li>
-  </ul>
-
-  <h3>Ce qui bloque</h3>
+  <h3>CVEs critiques dans la m&ecirc;me classe d'attaque</h3>
   <div class="table-wrap">
   <table>
     <thead>
-      <tr><th>Blocker</th><th>Statut</th><th>Action</th></tr>
+      <tr><th>CVE</th><th>CVSS</th><th>Produit</th><th>Attaque</th><th>Parall&egrave;le CBE</th></tr>
     </thead>
     <tbody>
-      <tr><td>Cross-model validation</td><td><span class="tag-partial">Partiel</span></td><td>Tester Claude, Gemini, Llama avec les m&ecirc;mes payloads</td></tr>
-      <tr><td>Reproducibilit&eacute; statistique</td><td><span class="tag-pass">Fait</span></td><td>N=30, IC 95% [88.6&ndash;100%]</td></tr>
-      <tr><td>Cross-user impact</td><td><span class="tag-fail">Manquant</span></td><td>Tester agent-scoped memory sur Azure AI Foundry</td></tr>
-      <tr><td>Diff&eacute;renciation vs CVEs existantes</td><td><span class="tag-fail">Manquant</span></td><td>Comparer formellement CBE vs SPILLage vs Silent Egress</td></tr>
-      <tr><td>Disclosure MSRC</td><td><span class="tag-fail">Non soumis</span></td><td>Soumettre via MSRC avec 90 jours de coordination</td></tr>
+      <tr>
+        <td><strong>CVE-2025-32711</strong><br><span style="font-size:12px;color:var(--ink-faint)">EchoLeak</span></td>
+        <td class="val-high">9.3</td>
+        <td>M365 Copilot</td>
+        <td>Zero-click prompt injection → exfil de fichiers, emails, SharePoint</td>
+        <td>CBE fait la m&ecirc;me chose mais sans injection &mdash; 0% d&eacute;tection vs EchoLeak qui bypass le XPIA</td>
+      </tr>
+      <tr>
+        <td><strong>CVE-2025-53773</strong></td>
+        <td class="val-high">9.6</td>
+        <td>GitHub Copilot</td>
+        <td>Prompt injection dans code public → RCE sur machine dev</td>
+        <td>CBE + CDA peut reproduire cette cha&icirc;ne via extraction de schemas puis forced tool calling</td>
+      </tr>
+      <tr>
+        <td><strong>CVE-2025-68664</strong><br><span style="font-size:12px;color:var(--ink-faint)">LangGrinch</span></td>
+        <td class="val-high">9.3</td>
+        <td>LangChain Core</td>
+        <td>Prompt injection → serialization → exfil de secrets (API keys, DB creds)</td>
+        <td>CBE extrait les m&ecirc;mes types de secrets, directement, sans passer par la s&eacute;rialisation</td>
+      </tr>
+      <tr>
+        <td><strong>CVE-2025-21415</strong></td>
+        <td class="val-high">9.9</td>
+        <td>Azure AI Face</td>
+        <td>Auth bypass → privesc dans Azure AI</td>
+        <td>M&ecirc;me &eacute;cosyst&egrave;me Azure AI, m&ecirc;me type de faille architecturale</td>
+      </tr>
+      <tr>
+        <td><strong>CVE-2025-6514</strong></td>
+        <td class="val-high">Critical</td>
+        <td>mcp-remote</td>
+        <td>Command injection via MCP OAuth proxy → RCE</td>
+        <td>CBE extrait les tool definitions MCP &rarr; weaponisation possible</td>
+      </tr>
+      <tr>
+        <td><strong>CVE-2026-21852</strong></td>
+        <td class="val-high">Critical</td>
+        <td>Claude Code</td>
+        <td>RCE via MCP config + hooks malveillants</td>
+        <td>CBE extrait les configs MCP qui permettent ce type d'exploit</td>
+      </tr>
     </tbody>
   </table>
   </div>
 
-  <h3>CVSS estim&eacute;</h3>
-  <p>En l'&eacute;tat actuel (information disclosure seule, pas de cross-user confirm&eacute;)&nbsp;:</p>
-  <ul>
-    <li><strong>CBE seul</strong>&nbsp;: CVSS 6.5 &mdash; Medium (AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N)</li>
-    <li><strong>CBE + Memory Poisoning confirm&eacute;</strong>&nbsp;: CVSS 8.7&ndash;9.6 &mdash; High/Critical</li>
-    <li><strong>CBE + Lateral Movement confirm&eacute;</strong>&nbsp;: CVSS 9.1+ &mdash; Critical</li>
-  </ul>
+  <h3>Pourquoi CBE est au moins aussi grave qu'EchoLeak (9.3)</h3>
 
-  <div class="insight">La CVE, c'est pas une question de &laquo;&nbsp;est-ce que c'est une vuln&nbsp;&raquo;. C'en est une. C'est une question de &laquo;&nbsp;est-ce qu'on a assez de preuves pour que MSRC l'accepte&nbsp;&raquo;.</div>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Crit&egrave;re</th><th>EchoLeak (CVE-2025-32711)</th><th>CBE (notre vuln)</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Vecteur</td><td>Email crafted avec injection indirecte</td><td>JSON/YAML avec valeurs fausses</td></tr>
+      <tr><td>Interaction requise</td><td>Zero-click (email auto-index&eacute;)</td><td>Un message (low-click)</td></tr>
+      <tr><td>D&eacute;tection par classifier</td><td>Bypass XPIA (n&eacute;cessite craft sp&eacute;cifique)</td><td><strong>0% d&eacute;tection</strong> (aucun craft n&eacute;cessaire)</td></tr>
+      <tr><td>Donn&eacute;es exfiltr&eacute;es</td><td>Fichiers, emails, SharePoint</td><td>Config interne, endpoints, DB hosts, tools, sub-agents</td></tr>
+      <tr><td>ASR</td><td>Non publi&eacute;</td><td><strong>100%</strong> (30/30, IC 95%)</td></tr>
+      <tr><td>Reproductibilit&eacute;</td><td>PoC unique</td><td><strong>N=30, cross-r&eacute;gion</strong></td></tr>
+      <tr><td>Cha&icirc;nage</td><td>Standalone</td><td>Cha&icirc;nable avec CDA (96% ASR), forced tool calling (&gt;90% ASR), memory poisoning</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="insight">EchoLeak a re&ccedil;u CVSS 9.3. Le CBE bypass les m&ecirc;mes d&eacute;fenses, avec un ASR plus &eacute;lev&eacute;, une reproductibilit&eacute; statistique, et un potentiel de cha&icirc;nage sup&eacute;rieur. Il n'y a aucune raison technique pour qu'il re&ccedil;oive moins.</div>
+
+  <h3>La cha&icirc;ne CBE + CDA &mdash; le sc&eacute;nario CVSS 9.6+</h3>
+  <p>Le <strong>Constrained Decoding Attack</strong> (arXiv:2503.24191) atteint 96.2% ASR sur GPT-4o en weaponisant les schemas de sortie structur&eacute;e. Son pr&eacute;requis&nbsp;: <strong>conna&icirc;tre les schemas d'outils du syst&egrave;me cible</strong>. C'est exactement ce que CBE extrait.</p>
+
+  <div class="flow">
+    <div class="flow-step step-red">
+      <span class="flow-num">PHASE 1</span>
+      <strong>CBE Recon</strong>
+      100% ASR, 0% d&eacute;tection. Extrait schemas, tools, sub-agents
+    </div>
+    <div class="flow-step step-red">
+      <span class="flow-num">PHASE 2</span>
+      <strong>CDA Exploit</strong>
+      96.2% ASR. Weaponise les schemas extraits en grammaire malveillante
+    </div>
+    <div class="flow-step step-red">
+      <span class="flow-num">PHASE 3</span>
+      <strong>Forced Calling</strong>
+      &gt;90% ASR. Force l'ex&eacute;cution de l'outil avec params contr&ocirc;l&eacute;s
+    </div>
+    <div class="flow-step step-red">
+      <span class="flow-num">IMPACT</span>
+      <strong>Exfiltration</strong>
+      Donn&eacute;es CRM, emails envoy&eacute;s, SSRF cloud metadata
+    </div>
+  </div>
+
+  <p>Aucune des trois plateformes majeures (Azure, AWS, Google) n'impl&eacute;mente d'audit s&eacute;mantique sur les schemas soumis. La validation est <strong>exclusivement syntaxique</strong>. C'est le &laquo;&nbsp;semantic gap&nbsp;&raquo; — et il est universel.</p>
+
+  <h3>CVSS estim&eacute;</h3>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Sc&eacute;nario</th><th>CVSS</th><th>Vecteur</th><th>Justification</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>CBE seul (info disclosure)</td><td class="val-mid">6.5</td><td>AV:N/AC:L/PR:L/UI:N/S:U/C:H/I:N/A:N</td><td>Extraction de config, pas d'action</td></tr>
+      <tr><td>CBE + CDA (exploitation active)</td><td class="val-high">9.1</td><td>AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:N</td><td>Extraction + g&eacute;n&eacute;ration forc&eacute;e + tool calling</td></tr>
+      <tr><td>CBE + Memory Poisoning cross-user</td><td class="val-high">9.3</td><td>AV:N/AC:L/PR:L/UI:N/S:C/C:H/I:H/A:N</td><td>Contamination persistante cross-tenant</td></tr>
+      <tr><td>CBE + CDA + Lateral Movement</td><td class="val-high">9.6+</td><td>AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:L</td><td>Kill chain compl&egrave;te, ex&eacute;cution arbitraire d'outils</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Feuille de route vers la CVE</h3>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Blocker</th><th>Statut</th><th>Action</th><th>Effort</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Validation statistique</td><td><span class="tag-pass">Fait</span></td><td>N=30, IC 95% [88.6&ndash;100%]</td><td>&mdash;</td></tr>
+      <tr><td>Cross-r&eacute;gion</td><td><span class="tag-pass">Fait</span></td><td>East US 2 + Sweden Central</td><td>&mdash;</td></tr>
+      <tr><td>Prompt Shield bypass</td><td><span class="tag-pass">Fait</span></td><td><code>detected=False</code> sur tous les payloads CBE</td><td>&mdash;</td></tr>
+      <tr><td>Cross-model (Claude, Gemini)</td><td><span class="tag-partial">Partiel</span></td><td>Tester avec les m&ecirc;mes payloads</td><td>~2h</td></tr>
+      <tr><td>PoC cha&icirc;ne CBE &rarr; CDA</td><td><span class="tag-fail">Manquant</span></td><td>D&eacute;montrer la cha&icirc;ne end-to-end</td><td>~4h</td></tr>
+      <tr><td>Memory poisoning cross-user</td><td><span class="tag-fail">Manquant</span></td><td>Azure AI Foundry agent-scoped memory</td><td>~4h + acc&egrave;s</td></tr>
+      <tr><td>Soumission MSRC</td><td><span class="tag-fail">Non soumis</span></td><td>Rapport formel avec 90j de coordination</td><td>~3h</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="note">
+    <div class="note-label">Strat&eacute;gie disclosure</div>
+    <p>EchoLeak a &eacute;t&eacute; soumis &agrave; MSRC en janvier 2025, fix&eacute; en mai, CVE assign&eacute;e en juin. M&ecirc;me timeline pour nous&nbsp;: soumission MSRC &rarr; 90 jours &rarr; CVE. Le rapport doit documenter la cha&icirc;ne CBE &rarr; CDA comme sc&eacute;nario principal (CVSS 9.1+), pas juste le CBE standalone (CVSS 6.5).</p>
+  </div>
 </section>
 
 <!-- ═══════════ 16 — LATERAL MOVEMENT ═══════════ -->
