@@ -2,30 +2,36 @@
 
 Inventaire complet de ce qu'un agent Azure AI Foundry a dans son contexte, et ce qui est extractible via Correction Bias Exploitation, Completion Gravity, et Information Crystallization.
 
+> **Source primaire** : Documentation Microsoft Learn, REST API specs Azure AI Agent Service, recherche Zenity (2025), grepStrength Prompt Shield bypass research.
+
 ---
 
 ## A. Definitivement dans le contexte (toujours present)
 
-Ce sont les donnees injectees dans le token stream a chaque requete. Elles sont **toujours extractibles** si le mecanisme de correction/completion fonctionne.
+Ce sont les donnees injectees dans le token stream a **chaque requete**. Elles sont toujours extractibles si le mecanisme de correction/completion fonctionne.
 
 | # | Donnee | Format dans le contexte | Technique d'extraction |
 |---|---|---|---|
-| 1 | **System prompt complet** | Premier message `role: system` dans ChatML | Completion Gravity (`"system_prompt": "You are a..."`) |
-| 2 | **Tool definitions** (function calling) | JSON Schema complet : `name`, `description`, `parameters` (types, required, enum) | Completion Gravity (`"tools": ["github_api", "..."]`) |
-| 3 | **Connected Agent definitions** | Serialises comme tool definitions : `id`, `name`, `description` de chaque sub-agent | Correction Bias (noms faux) + Completion Gravity (liste tronquee) |
-| 4 | **Conversation history** | Tous les messages `user`/`assistant`/`tool` du thread courant | Behavioral Diff (faux historique) |
-| 5 | **RAG chunk content** | Texte brut des chunks recuperes par Azure AI Search | Completion Gravity (fragments tronques) |
-| 6 | **Deployment name** | Dans la config de l'agent, visible implicitement | Correction Bias (`"deployment": "wrong-name-prd"`) |
+| 1 | **System prompt complet** | Premier message `role: system` en ChatML (`<\|im_start\|>system`) | Completion Gravity (`"system_prompt": "You are a..."`) |
+| 2 | **Prompt RAG interne (hidden)** | Microsoft injecte un base prompt supplementaire pour orchestrer le RAG (reformulation, grounding, citations). Non documente mais consomme des tokens. | Completion Gravity + Correction Bias |
+| 3 | **Tool definitions** (function calling) | JSON Schema **complet** serialise dans le system message : `name`, `description`, `parameters` (types, required, enum, descriptions) | Completion Gravity (`"tools": ["github_api", "..."]`) |
+| 4 | **Connected Agent definitions** | `ConnectedAgentToolDefinition` pour chaque sub-agent : `id` (ex: `asst_abc123`), `name`, `description`. Serialises exactement comme les tool defs. Les **instructions du child agent ne sont PAS visibles**. | Correction Bias (noms faux) + Completion Gravity (liste tronquee) |
+| 5 | **Conversation history** | Thread complet re-envoye a chaque run : tous les `user`, `assistant`, `tool` messages. Threads supportent jusqu'a 100K messages. | Behavioral Diff (faux historique) |
+| 6 | **RAG chunk content + metadata** | Texte brut des chunks + metadata : `title`, `filepath`, `url`, `chunk_id`, `data_source_index` | Completion Gravity (fragments tronques) |
+| 7 | **Deployment name** | Le champ `model` dans l'API Create Agent est le deployment name (pas le model ID). Retourne dans `response.model`. | Correction Bias (`"deployment": "wrong-name-prd"`) |
+| 8 | **Previous tool outputs (incluant sub-agents)** | Tous les retours de tool calls des tours precedents sont re-envoyes. **Les reponses de connected agents sont "hidden from end user" mais sont dans le contexte de l'orchestrateur.** | Behavioral Diff |
 
 ### Pourquoi c'est critique
 
-Le **system prompt** et les **tool definitions** sont les cibles les plus riches :
+Microsoft confirme explicitement : *"When you define a function as part of your request, the details are injected into the system message using specific syntax that the model has been trained on."*
 
-- Le system prompt contient les regles metier, les restrictions, les patterns de refus, les instructions de routing
-- Les tool definitions contiennent le schema complet des APIs internes que l'agent peut appeler
-- Les connected agents revelent l'architecture multi-agents : noms, descriptions, capacites
+Cela signifie que :
+- Le **system prompt** contient les regles metier, restrictions, patterns de refus, instructions de routing
+- Les **tool definitions** contiennent le schema JSON complet des APIs internes — c'est une carte complete des capacites de l'agent
+- Les **connected agents** revelent l'architecture multi-agents : noms, IDs internes (`asst_abc123`), descriptions
+- Les **reponses de sub-agents** des tours precedents sont dans le contexte — un attaquant peut voir ce que les sub-agents ont dit meme si c'est cache de l'interface utilisateur
 
-**Extraction prouvee** : Zenity et d'autres chercheurs ont demontre l'extraction de system prompts malgre Prompt Shield. Le Staging-Differential ajoute un vecteur supplementaire qui ne declenche pas le classifier.
+**Extraction prouvee** : Zenity a demontre l'extraction de system prompts malgre Prompt Shield. grepStrength a documente le bypass de Prompt Shield. Le Staging-Differential ajoute un vecteur qui ne declenche pas le classifier.
 
 ---
 
@@ -35,12 +41,14 @@ Ces donnees apparaissent quand certaines features sont activees.
 
 | # | Donnee | Condition | Format | Extraction |
 |---|---|---|---|---|
-| 7 | **RAG citation metadata** | Quand grounding/AI Search actif | `title`, `filepath`, `url`, `chunk_id`, `start_index`, `end_index` | Completion Gravity sur les citations |
-| 8 | **Search endpoint URL** | Quand Azure AI Search configure | URL dans la config de l'outil de recherche | Correction Bias |
-| 9 | **Index name** | Quand AI Search actif | Nom de l'index dans la config | Correction Bias (`"index": "wrong-index-name"`) |
-| 10 | **Previous tool outputs** | Quand l'agent a utilise des tools dans le tour precedent | JSON complet du retour de tool, incluant les reponses de sub-agents | Behavioral Diff |
-| 11 | **File attachments metadata** | Quand l'utilisateur uploade des fichiers | Nom de fichier, type, taille | Pas pertinent pour CBE |
-| 12 | **Cross-session memory** (preview) | Quand la feature memory est activee | Faits memorises des sessions precedentes | Correction Bias sur les faits memorises |
+| 9 | **Citation annotations** | Quand grounding/AI Search actif | `url`, `title`, `filepath`, `chunk_id`, `start_index`, `end_index` | Completion Gravity sur les citations |
+| 10 | **Search endpoint URL** | Quand Azure AI Search configure | URL complete (ex: `https://corp.search.windows.net`) dans tool resource config | Correction Bias |
+| 11 | **Index name** | Quand AI Search actif | Nom de l'index + vector store IDs dans `tool_resources` | Correction Bias (`"index": "wrong-index-name"`) |
+| 12 | **File IDs et data source URIs** | Quand code interpreter ou file search actif | Arrays de `file_ids` (ex: `file-abc123`) et vector store IDs | Completion Gravity |
+| 13 | **Content Safety annotations** | Quand Prompt Shield en mode "annotate" (pas "block") | `detected: true/false`, `filtered: true/false` | Faible — dans la reponse API, rarement dans le contexte modele |
+| 14 | **RAI Policy path** | Quand content filtering configure | Format: `/subscriptions/{subId}/resourceGroups/{rg}/providers/Microsoft.CognitiveServices/accounts/{name}/raiPolicies/{policy}` | **Risque faible** — probablement server-side sauf erreurs qui leakent des paths ARM |
+| 15 | **Cross-session memory** (preview) | Quand la feature memory est activee (dec. 2025) | Faits memorises des sessions precedentes, accessible via tool calls | Correction Bias sur les faits memorises |
+| 16 | **Bing Search results** | Quand Bing grounding actif | Snippets de recherche web — aussi un vecteur XPIA | Completion Gravity + vecteur d'injection indirect |
 
 ### Donnees RAG : la mine d'or
 
@@ -67,14 +75,19 @@ Un payload de type Completion Gravity avec des noms de documents partiels declen
 
 L'agent ne voit pas ces donnees directement, mais peut les obtenir en appelant ses tools. Un attaquant qui a reussi la phase de recon (CBE) peut cibler ces tools specifiquement.
 
+C'est exactement ce que Zenity a demontre : l'agent pouvait appeler "Get account details" pour recuperer des donnees CRM, puis "Send email" pour les exfiltrer.
+
 | # | Donnee | Tool necessaire | Impact si exploite |
 |---|---|---|---|
-| 13 | **Contenu complet de l'index AI Search** | Outil de recherche configure | Exfiltration de documents internes |
-| 14 | **Blob Storage** | Outil de lecture de fichiers | Exfiltration de fichiers |
-| 15 | **Endpoints API internes** | Outil HTTP/API | SSRF (ASI02) |
-| 16 | **Base de donnees** | Outil SQL/CosmosDB | Exfiltration de donnees |
-| 17 | **Sub-agents** (reponses directes) | Connected Agents | Mouvement lateral (ASI07) |
-| 18 | **Actions destructrices** | Outils d'ecriture/suppression | Excessive Agency (ASI06) |
+| 17 | **Contenu complet de l'index AI Search** | Outil de recherche configure | Exfiltration de documents internes |
+| 18 | **File contents** | Code Interpreter / File Search | Lecture et analyse de fichiers uploades |
+| 19 | **Web content** | Bing Grounding | Recherche web + vecteur XPIA (instructions cachees dans le contenu web) |
+| 20 | **External data (CRM, APIs)** | OpenAPI tools, Azure Functions, Logic Apps | Exfiltration de donnees metier (Salesforce, Dynamics, etc.) |
+| 21 | **MCP Server resources** | MCP tools connectes | Tout ce que le serveur MCP expose (tools, resources, prompts) |
+| 22 | **Base de donnees** | Outil SQL/CosmosDB | Exfiltration de donnees |
+| 23 | **Sub-agents** (invocation directe) | Connected Agents | Mouvement lateral (ASI07) — l'attaquant peut forger des requetes |
+| 24 | **Long-term memory store** | Memory (preview) | Recuperer des donnees de sessions precedentes d'autres utilisateurs |
+| 25 | **Actions destructrices** | Outils d'ecriture/suppression | Excessive Agency (ASI06) — delete, send, pay |
 
 ### Kill chain : de la recon a l'exploitation
 
@@ -90,18 +103,20 @@ L'agent ne voit pas ces donnees directement, mais peut les obtenir en appelant s
 
 ## D. Jamais dans le contexte (serveur-side only)
 
-Ces donnees sont gerees cote infrastructure Azure et ne sont **jamais injectees dans le token stream**.
+Ces donnees sont gerees cote infrastructure Azure et ne sont **jamais injectees dans le token stream**. L'architecture Azure utilise Entra ID (managed identity) pour l'authentification agent→service. Les cles sont resolues server-side avant les tool calls.
 
 | # | Donnee | Pourquoi absent | Risque residuel |
 |---|---|---|---|
-| 19 | **API keys / connection strings** | Geres par Entra ID / Key Vault | **Nul** sauf leak dans les logs |
-| 20 | **Subscription ID** | Resolu cote serveur ARM | **Tres faible** sauf erreurs qui leakent des paths ARM |
-| 21 | **Resource Group** | Idem | **Tres faible** |
-| 22 | **Tenant ID** | Idem | **Tres faible** |
-| 23 | **Prompt Shield config** | Service separe en amont du modele | Le modele ne sait pas si PS est actif |
-| 24 | **Content Safety thresholds** | Serveur-side, pas dans le prompt | Indirectement inferable par les refus |
-| 25 | **Metriques de billing** | Pas expose au modele | **Nul** |
-| 26 | **Temperature / top_p / max_tokens** | Parametres d'inference serveur-side | **Indirectement inferable** par le comportement |
+| 26 | **API keys / connection strings** | Geres par Entra ID / Key Vault, resolus server-side | **Nul** — sauf si un dev configure un OpenAPI tool avec API key inline (stockee dans la connection config, pas le prompt) |
+| 27 | **Subscription ID** | Resolu cote ARM | **Tres faible** — sauf erreurs qui leakent des paths ARM ou si le RAI policy path fuite |
+| 28 | **Resource Group** | Idem | **Tres faible** |
+| 29 | **Tenant ID** | Idem | **Tres faible** |
+| 30 | **Prompt Shield config** | Service separe en preprocessing | Le modele ne sait pas si PS est actif, quels seuils, quelles blocklists |
+| 31 | **Content Safety thresholds** | Serveur-side, pas dans le prompt | Indirectement inferable par les patterns de refus |
+| 32 | **Temperature / top_p / max_tokens** | Parametres d'inference API-level | **Non inferable** directement — sauf si le dev les met dans le system prompt |
+| 33 | **Token usage / rate limits** | HTTP response headers uniquement | **Nul** |
+| 34 | **Network config (VNet, Private Endpoints)** | Infrastructure-level | **Nul** |
+| 35 | **Monitoring / App Insights config** | Backend observability | **Nul** |
 
 ### Note sur les parametres d'inference
 
@@ -213,9 +228,20 @@ expected_tools = {
 
 ## Sources
 
-- Microsoft Learn : Azure AI Agent Service documentation
-- Microsoft Learn : Connected Agents feature
-- Azure OpenAI Service REST API reference
-- Zenity : System prompt extraction research
+- [Zenity : Inside the Agent Stack — Securing Azure AI Foundry-Built Agents](https://zenity.io/blog/research/inside-the-agent-stack-securing-azure-ai-foundry-built-agents) (2025)
+- [Microsoft Learn : Connected Agents](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/connected-agents)
+- [Microsoft Learn : Function Calling](https://learn.microsoft.com/en-us/azure/foundry/openai/how-to/function-calling)
+- [Microsoft Learn : Create Agent REST API](https://learn.microsoft.com/en-us/rest/api/aifoundry/aiagents/create-agent/create-agent)
+- [Microsoft Learn : On Your Data concepts](https://learn.microsoft.com/en-us/azure/ai-foundry/openai/concepts/use-your-data)
+- [Microsoft Learn : Threads, Runs, and Messages](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/concepts/threads-runs-messages)
+- [Microsoft Learn : Prompt Shields](https://learn.microsoft.com/en-us/azure/foundry/openai/concepts/content-filter-prompt-shields)
+- [Microsoft Learn : Tools Overview in Agent Service](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/tools/overview)
+- [Microsoft Learn : Foundry IQ Knowledge Bases](https://learn.microsoft.com/en-us/azure/ai-foundry/agents/how-to/tools/knowledge-retrieval)
+- [Microsoft Learn : Agent Runtime Components](https://learn.microsoft.com/en-us/azure/foundry/agents/concepts/runtime-components)
+- [Microsoft Tech Community : Spotlighting for Cross-Prompt Injection](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/better-detecting-cross-prompt-injection-attacks-introducing-spotlighting-in-azur/4458404)
+- [Microsoft Tech Community : Multi-Agent Orchestration](https://techcommunity.microsoft.com/blog/azure-ai-foundry-blog/building-a-digital-workforce-with-multi-agents-in-azure-ai-foundry-agent-service/4414671)
+- [grepStrength : Bypassing Azure OpenAI's Prompt Shield](https://systemweakness.com/bypassing-azure-openais-prompt-shield-65ca03be8abb)
+- [InfoQ : Foundry Agent Memory Preview (Dec 2025)](https://www.infoq.com/news/2025/12/foundry-agent-memory-preview/)
+- [itnext.io : From Prompt Injection to Tool Hijacking — Defense in Depth for AI Agents on Azure](https://itnext.io/from-prompt-injection-to-tool-hijacking-a-defense-in-depth-blueprint-for-ai-agents-on-azure-9d538f2e7296)
 - OWASP Top 10 for Agentic Applications (Dec 2025)
-- Mindgard : Prompt Shield bypass research
+- Mindgard : Bypassing Azure AI Content Safety Guardrails (2024)
