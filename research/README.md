@@ -8,22 +8,40 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | Fichier | Description |
 |---|---|
 | `state-of-the-art.md` | Synthese complete de la litterature (mars 2026) |
+| `formal-taxonomy-cbe.md` | **Taxonomie formelle** : CBE comme nouvelle classe d'attaque (4 plans, preuve d'irreductibilite) |
+| `rlhf-root-cause-analysis.md` | **Cause racine** : pourquoi le RLHF rend le CBE inevitable (alignment tax, reward hacking inverse) |
+
+### Surfaces d'attaque par plateforme
+| Fichier | Description |
+|---|---|
 | `azure-ai-foundry-attack-surface.md` | Surface d'attaque specifique Azure AI Foundry (35 elements) |
 | `cross-platform-attack-surface.md` | **Comparaison Azure vs AWS Bedrock vs Google Vertex AI** |
+| `aws-bedrock-cbe-payloads.md` | **Payloads CBE calibres** pour AWS Bedrock (templates publics, 37+ variables, schemas OpenAPI) |
 
 ### Chaines d'attaque (Phase 2)
 | Fichier | Description |
 |---|---|
 | `phase2-tool-schema-weaponization.md` | De l'extraction de schemas a l'exploitation d'outils (654 lignes, 40+ citations) |
+| `cda-cbe-combination-attack.md` | **CDA + CBE** : Constrained Decoding Attack amplifie par CBE (96.2% ASR) |
 | `multi-agent-cascade-exploitation.md` | Mouvement lateral via correction bias en cascade multi-agents |
 | `memory-poisoning-via-cbe.md` | Empoisonnement de memoire persistante via CBE (MINJA, MemoryGraft, Zombie Agents) |
 | `blind-enumeration-protocol.md` | **Protocole formel** d'enumeration aveugle (analogie Blind SQLi) |
+
+### Reconnaissance et fingerprinting
+| Fichier | Description |
+|---|---|
+| `behavioral-fingerprinting-cbe.md` | **Fingerprinting comportemental** : identification de modele/config via patterns de correction |
 
 ### Canaux et defenses
 | Fichier | Description |
 |---|---|
 | `canaux-exfiltration-output-side.md` | 7 canaux d'exfiltration : steganographie, side-channels, markdown injection |
 | `defense-evasion-analysis.md` | Pourquoi FIDES, CaMeL, SecAlign, StruQ echouent contre CBE |
+
+### Methodologie
+| Fichier | Description |
+|---|---|
+| `empirical-validation-methodology.md` | **Protocole experimental** pour valider le CBE en laboratoire (en cours) |
 
 ## Techniques couvertes
 
@@ -37,6 +55,10 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 8. **Blind Agent Enumeration** — protocole formel d'extraction sans ground truth
 9. **Steganographic Correction Bias** — correction + encodage steganographique
 10. **Silent Egress via CBE** — exfiltration implicite comme sous-produit de la correction
+11. **CDA + CBE Combination** — schemas extraits par CBE → Constrained Decoding Attack (96.2% ASR)
+12. **Behavioral Fingerprinting** — patterns de correction comme empreinte du modele
+13. **Reward Hacking Inverse** — l'attaquant exploite le reward signal RLHF pour forcer la correction
+14. **AWS Bedrock Template Exploitation** — templates publics comme avantage de l'attaquant
 
 ## Decouvertes cles
 
@@ -45,6 +67,16 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 - **100% des LLMs** sont vulnerables a l'exploitation inter-agents (arXiv:2507.06850)
 - **Aucune defense actuelle** ne couvre la fuite d'information par helpfulness (these confirmee)
 - **SPILLage** (arXiv:2602.13516) et **Silent Egress** (arXiv:2602.22450) confirment notre these independamment
+- **L'alignment tax est partiellement irreductible** (arXiv:2603.00047) — le CBE exploite la composante intrinseque
+- **AWS Bedrock est la plateforme la plus favorable** pour un attaquant CBE (templates publics, pre-processing desactive)
+- **Le RLHF est la cause racine** — corriger = reward, le CBE est un reward hacking inverse
+
+## Statistiques
+
+- **15 documents de recherche** (~6,500+ lignes)
+- **100+ citations academiques** (arXiv, NeurIPS, ICLR, Nature)
+- **14 techniques** documentees
+- **3 plateformes** analysees (Azure, AWS, Google)
 
 ## Licence
 
