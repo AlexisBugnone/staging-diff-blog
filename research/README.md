@@ -60,6 +60,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `bug-bounty-hunting-playbook.md` | **Playbook pratique** : cibles prioritaires, setup $0, checklist semaine 1-2, template de rapport, erreurs a eviter |
 | `gpt-store-cbe-hunting.md` | **GPT Store hunting** : quick wins, payloads specifiques GPTs, workflow de test en 4 etapes |
 | `cbe-test-harness.py` | **Script Python** : test harness automatise pour valider le CBE sur OpenAI/Anthropic/Google APIs |
+| `live-targets-march-2026.md` | **Cibles actives** : CVE-2025-6514 (MCP), PleaseFix (browsers), OpenClaw (21K instances), plan d'action semaine |
 
 ## Techniques couvertes
 
@@ -104,7 +105,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 
 ## Statistiques
 
-- **26 documents de recherche** (~17,000+ lignes) + 1 script Python
+- **27 documents de recherche** (~18,000+ lignes) + 1 script Python
 - **220+ citations academiques** (arXiv, NeurIPS, ICLR, Nature, OWASP, CVSS)
 - **20 techniques** documentees
 - **4 plateformes cloud** analysees (Azure, AWS, Google, standalone)
