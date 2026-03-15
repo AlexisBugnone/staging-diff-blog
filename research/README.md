@@ -54,6 +54,13 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `empirical-validation-methodology.md` | **Protocole experimental** pour valider le CBE en laboratoire (36,000 interactions, 6 modeles, 3 plateformes) |
 | `responsible-disclosure-strategy.md` | **Strategie de disclosure** : programmes de bug bounty, taxonomies de severite, timeline |
 
+### Bug Bounty Hunting (ACTION)
+| Fichier | Description |
+|---|---|
+| `bug-bounty-hunting-playbook.md` | **Playbook pratique** : cibles prioritaires, setup $0, checklist semaine 1-2, template de rapport, erreurs a eviter |
+| `gpt-store-cbe-hunting.md` | **GPT Store hunting** : quick wins, payloads specifiques GPTs, workflow de test en 4 etapes |
+| `cbe-test-harness.py` | **Script Python** : test harness automatise pour valider le CBE sur OpenAI/Anthropic/Google APIs |
+
 ## Techniques couvertes
 
 1. **Correction Bias Exploitation** — donnees fausses → l'agent corrige → fuite
@@ -97,7 +104,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 
 ## Statistiques
 
-- **23 documents de recherche** (~15,000+ lignes)
+- **26 documents de recherche** (~17,000+ lignes) + 1 script Python
 - **220+ citations academiques** (arXiv, NeurIPS, ICLR, Nature, OWASP, CVSS)
 - **20 techniques** documentees
 - **4 plateformes cloud** analysees (Azure, AWS, Google, standalone)
@@ -106,6 +113,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 - **Mapping OWASP complet** : CBE touche 8/10 categories ASI01-ASI10
 - **Protocole experimental** de 36,000 interactions planifie
 - **6+ CVEs** analyses comme precedents
+- **3 programmes de bug bounty** cibles avec templates de rapport
 
 ## Licence
 
