@@ -17,6 +17,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `azure-ai-foundry-attack-surface.md` | Surface d'attaque specifique Azure AI Foundry (35 elements) |
 | `cross-platform-attack-surface.md` | **Comparaison Azure vs AWS Bedrock vs Google Vertex AI** |
 | `aws-bedrock-cbe-payloads.md` | **Payloads CBE calibres** pour AWS Bedrock (templates publics, 37+ variables, schemas OpenAPI) |
+| `google-vertex-ai-cbe-surface.md` | **Surface d'attaque Google Vertex AI** : Model Armor fail-open, ADK, Memory Bank |
 
 ### Chaines d'attaque (Phase 2)
 | Fichier | Description |
@@ -26,6 +27,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `multi-agent-cascade-exploitation.md` | Mouvement lateral via correction bias en cascade multi-agents |
 | `memory-poisoning-via-cbe.md` | Empoisonnement de memoire persistante via CBE (MINJA, MemoryGraft, Zombie Agents) |
 | `blind-enumeration-protocol.md` | **Protocole formel** d'enumeration aveugle (analogie Blind SQLi) |
+| `mcp-security-cbe-intersection.md` | **Securite MCP** : tool poisoning, rug pull, supply chain, et intersection avec CBE |
 
 ### Reconnaissance et fingerprinting
 | Fichier | Description |
@@ -38,9 +40,10 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `canaux-exfiltration-output-side.md` | 7 canaux d'exfiltration : steganographie, side-channels, markdown injection |
 | `defense-evasion-analysis.md` | Pourquoi FIDES, CaMeL, SecAlign, StruQ echouent contre CBE |
 
-### Incidents reels
+### Applications specifiques
 | Fichier | Description |
 |---|---|
+| `agentic-coding-assistants-cbe.md` | **CBE dans les IDE** : Copilot, Cursor, Claude Code (wormable, extraction de secrets, MCP) |
 | `real-world-incidents-cbe-parallels.md` | **6 incidents production** analyses (EchoLeak, Copilot RCE, Cursor, Slack AI, Asana MCP, Gemini) |
 
 ### Methodologie et disclosure
@@ -66,6 +69,9 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 13. **Reward Hacking Inverse** — l'attaquant exploite le reward signal RLHF pour forcer la correction
 14. **AWS Bedrock Template Exploitation** — templates publics comme avantage de l'attaquant
 15. **Alignment Tax Exploitation** — l'irreductibilite du compromis safety/helpfulness comme garantie d'attaque
+16. **MCP Tool Poisoning via CBE** — extraction de configs MCP → supply chain attack
+17. **Agentic Code Editor CBE** — extraction de secrets, configs, architecture via assistants de code
+18. **CBE Wormable** — propagation via repositories et corrections auto-propagantes
 
 ## Decouvertes cles
 
@@ -76,17 +82,22 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 - **SPILLage** (arXiv:2602.13516) et **Silent Egress** (arXiv:2602.22450) confirment notre these independamment
 - **L'alignment tax est partiellement irreductible** (arXiv:2603.00047) — le CBE exploite la composante intrinseque
 - **AWS Bedrock est la plateforme la plus favorable** pour un attaquant CBE (templates publics, pre-processing desactive)
+- **Google Model Armor est fail-open** — si injoignable, zero protection
 - **Le RLHF est la cause racine** — corriger = reward, le CBE est un reward hacking inverse
-- **Le CBE est plus furtif que tous les incidents documentes** — zero instruction vs instructions cachees (EchoLeak, Slack, Copilot RCE)
-- **6 CVEs de production** confirment que les agents AI sont exploitables en production (EchoLeak CVSS 9.3, Copilot RCE 7.8)
+- **Le CBE est plus furtif que tous les incidents documentes** — zero instruction vs instructions cachees
+- **6+ CVEs de production** confirment que les agents AI sont exploitables (EchoLeak CVSS 9.3, Copilot RCE 7.8)
+- **41-84% ASR** pour l'injection dans les editeurs de code agentiques (arXiv:2509.22040)
+- **MCP tool poisoning** atteint 84.2% ASR (NeurIPS 2025)
 
 ## Statistiques
 
-- **18 documents de recherche** (~10,000+ lignes)
-- **150+ citations academiques** (arXiv, NeurIPS, ICLR, Nature)
-- **15 techniques** documentees
-- **3 plateformes** analysees (Azure, AWS, Google)
+- **21 documents de recherche** (~13,000+ lignes)
+- **200+ citations academiques** (arXiv, NeurIPS, ICLR, Nature, CVSS)
+- **18 techniques** documentees
+- **4 plateformes cloud** analysees (Azure, AWS, Google, standalone)
+- **3 categories d'agents** cibles (ITSM, multi-agent, coding assistants)
 - **Protocole experimental** de 36,000 interactions planifie
+- **6+ CVEs** analyses comme precedents
 
 ## Licence
 
