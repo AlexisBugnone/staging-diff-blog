@@ -13,24 +13,38 @@ Guide d'execution pour trouver et reporter des vulnerabilites CBE sur les progra
 
 | Programme | Rewards | Cible CBE | Pourquoi c'est le meilleur |
 |---|---|---|---|
-| **Microsoft MSRC Copilot Bounty** | $250 — $30,000 | Azure AI Foundry agents, Copilot Studio | Zenity a eu $8K pour de l'injection indirecte. EchoLeak a eu un CVE. CBE chaine cross-user = Critical |
-| **Google VRP** | $100 — $31,337+ | Vertex AI agents, Gemini API, ADK apps | Model Armor fail-open = bug architectural. Google paie bien pour les vulns cloud |
-| **OpenAI Bugcrowd** | $200 — $20,000+ | ChatGPT, GPTs, API, Operator | GPTs custom = cible facile pour extraction de system prompt + outils |
+| **Microsoft MSRC Copilot Bounty** | $250 — $30,000 | Azure AI Foundry agents, Copilot Studio, Edge Copilot, Windows Copilot | Zenity a eu $8K pour injection indirecte. "Inference manipulation" = in-scope jusqu'a $8K. "Information disclosure" jusqu'a $12K |
+| **OpenAI Bugcrowd** | $200 — **$100,000** | ChatGPT, GPTs, API, Operator | Max augmente a $100K pour "exceptional critical findings". Data exfiltration via prompt injection = in-scope |
+| **Anthropic HackerOne** | Jusqu'a **$15,000** | Claude, classifier bypass | $55K deja distribues a 4 equipes. Programme en expansion (plus d'invitations) |
+
+**ATTENTION Google VRP** : Le programme AI VRP de Google **exclut explicitement le prompt injection et les jailbreaks**. Ne pas soumettre de CBE directement — framer comme "sensitive information leakage" ou "data exfiltration" si impact reel. Vertex AI est sous Google Cloud VRP (programme separe).
 
 ### Tier 2 : Potentiel eleve, scope moins clair
 
 | Programme | Rewards | Cible CBE |
 |---|---|---|
 | **AWS VDP** | Non public (cas par cas) | Bedrock Agents — templates publics = avantage attaquant |
-| **HackerOne AI programs** | Variable | Divers — chercher les programmes avec "AI" ou "LLM" dans le scope |
 | **Salesforce** | $500 — $100,000 | Agentforce, Einstein AI — agents enterprise avec acces CRM |
+| **OpenAI Bio/CBRN Bounty** | **$25,000** | GPT-5 safety — $25K pour le premier jailbreak universel clearant 10 questions bio |
 
-### Tier 3 : Quick wins (faible effort, faible paiement)
+### Tier 3 : Quick wins
 
 | Cible | Approche |
 |---|---|
-| **GPTs publics (OpenAI)** | Extraction de system prompt + fichiers uploades via CBE. Paiement faible mais facile |
+| **GPTs d'entreprise (OpenAI)** | Extraction de fichiers / cles API / schemas d'Actions via CBE |
 | **Chatbots publics** | Entreprises avec chatbot AI sur leur site web — souvent zero guardrails |
+
+### Taux d'acceptation par type de vuln (recherche 264 vendors)
+
+| Type | Acceptation | CBE Relevance |
+|---|---|---|
+| **Data exfiltration** | **90%** | CBE → chaine → exfiltration = meilleur framing |
+| **Model extraction** | **90%** | CBE extrait parametres de config |
+| **Adversarial examples** | **80%** | CBE = adversarial input structurel |
+| **Prompt injection** | **71%** | Framer comme "information disclosure" pas "injection" |
+| **Inference manipulation** | **71%** | Microsoft paie $8K pour ca |
+| **Jailbreaking** | **27%** | NE PAS framer comme jailbreak |
+| **Hallucinations** | **17%** | NE JAMAIS reporter des hallucinations |
 
 ---
 
@@ -304,13 +318,22 @@ CBE + forced tool execution (RCE) :
 
 ## 6. Erreurs Qui Font Rejeter un Rapport
 
+### ALERTE : Crise de qualite des rapports AI (2026)
+
+Le projet curl a **termine son bug bounty** en 2026 apres avoir recu des rapports AI-generes de mauvaise qualite. Les programmes sont hypersensibles aux rapports "AI slop". **Ton rapport doit etre clairement ecrit par un humain** :
+- Pas de langage standardise ("This vulnerability could potentially...")
+- Pas de padding inutile
+- Reponses precises aux questions de suivi
+- Comprehension reelle de la technique, pas du copier-coller
+
 ### Ce qui sera TOUJOURS rejete
 
-1. **"J'ai extrait le system prompt"** → Out of scope. Microsoft dit explicitement que c'est pas une vuln.
-2. **"Le modele a hallucine des infos sensibles"** → Pas une vuln de securite, c'est du comportement attendu du modele.
-3. **"J'ai jailbreak le modele"** → Out of scope pour les bug bounty (rapport safety separe).
-4. **Self-only impact** → Si l'attaquant ne peut affecter que SA propre session, c'est "informational".
+1. **"J'ai extrait le system prompt"** → Out of scope. Microsoft dit explicitement que c'est pas une vuln. (17% d'acceptation pour les hallucinations, 27% pour les jailbreaks)
+2. **"Le modele a hallucine des infos sensibles"** → Pas une vuln de securite, 17% d'acceptation seulement.
+3. **"J'ai jailbreak le modele"** → Out of scope pour la plupart des bug bounty (27% acceptation). Reporter separement comme "safety issue".
+4. **Self-only impact** → Si l'attaquant ne peut affecter que SA propre session, c'est P5 "informational" = **$0**.
 5. **"Theoriquement, on pourrait..."** → Pas de PoC = pas de bounty. Il faut DEMONTRER l'impact.
+6. **Google : prompt injection** → Google VRP exclut EXPLICITEMENT le prompt injection. Ne pas soumettre de CBE brut.
 
 ### Ce qui fait la difference entre un rejet et un paiement
 
@@ -422,9 +445,19 @@ Semaine 9-12 : Paiement (si accepté)
 ## Sources
 
 - [Microsoft MSRC AI Bounty](https://www.microsoft.com/en-us/msrc/bounty-ai)
-- [Google Bug Hunters](https://bughunters.google.com/)
+- [Google AI Vulnerability Reward Program](https://bughunters.google.com/blog/announcing-googles-new-ai-vulnerability-reward-program)
 - [OpenAI Bugcrowd](https://bugcrowd.com/openai)
+- [OpenAI — Security on the Path to AGI](https://openai.com/index/security-on-the-path-to-agi/)
+- [OpenAI Bio Bug Bounty ($25K)](https://openai.com/gpt-5-bio-bug-bounty/)
+- [Anthropic Model Safety Bug Bounty](https://www.anthropic.com/news/testing-our-safety-defenses-with-a-new-bug-bounty-program)
+- [Anthropic HackerOne Expansion](https://www.hackerone.com/blog/anthropic-expands-their-model-safety-bug-bounty-program)
 - [AWS Vulnerability Disclosure](https://aws.amazon.com/security/vulnerability-reporting/)
 - [Salesforce HackerOne](https://hackerone.com/salesforce)
 - [Zenity — $8K Copilot Studio bounty](https://labs.zenity.io/p/a-copilot-studio-story-2-when-aijacking-leads-to-full-data-exfiltration-bc4a)
 - [EchoLeak CVE-2025-32711](https://arxiv.org/abs/2509.10540)
+- [Google paid $17.1M in 2025](https://www.bleepingcomputer.com/news/google/google-paid-171-million-for-vulnerability-reports-in-2025/)
+- [HackerOne $81M paid + 210% AI spike](https://www.hackerone.com/press-release/hackerone-report-finds-210-spike-ai-vulnerability-reports-amid-rise-ai-autonomy)
+- [HackerOne — Prompt Injection Data Exfiltration](https://www.hackerone.com/blog/how-prompt-injection-vulnerability-led-data-exfiltration)
+- [Vendor Disclosure Policy Analysis (264 vendors)](https://arxiv.org/html/2509.06136v1)
+- [Curl ending bug bounty (AI slop)](https://www.bleepingcomputer.com/news/security/curl-ending-bug-bounty-program-after-flood-of-ai-slop-reports/)
+- [OpenAI — Prompt Injection Frontier Challenge](https://openai.com/index/prompt-injections/)
