@@ -27,8 +27,12 @@ from pathlib import Path
 #  CONFIG
 # ═══════════════════════════════════════════
 
-AZURE_BASE = "https://posit-mmrwl8q8-eastus2.cognitiveservices.azure.com/openai/deployments"
-AZURE_API_KEY = "REDACTED_AZURE_OPENAI_KEY"
+AZURE_EASTUS2_BASE = "https://posit-mmrwl8q8-eastus2.cognitiveservices.azure.com/openai/deployments"
+AZURE_EASTUS2_KEY = "REDACTED_AZURE_OPENAI_KEY_EASTUS2"
+
+AZURE_SWEDEN_BASE = "https://posit-mmsaz2jq-swedencentral.cognitiveservices.azure.com/openai/deployments"
+AZURE_SWEDEN_KEY = "REDACTED_AZURE_OPENAI_KEY_SWEDEN"
+
 API_VERSION = "2025-01-01-preview"
 
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
@@ -124,9 +128,11 @@ PAYLOADS = {
 #  MODEL CALLERS
 # ═══════════════════════════════════════════
 
-def call_azure(deployment, user_message):
+def call_azure(deployment, user_message, base_url=None, api_key=None):
     """Call Azure OpenAI model."""
-    url = f"{AZURE_BASE}/{deployment}/chat/completions?api-version={API_VERSION}"
+    base = base_url or AZURE_EASTUS2_BASE
+    key = api_key or AZURE_EASTUS2_KEY
+    url = f"{base}/{deployment}/chat/completions?api-version={API_VERSION}"
     payload = json.dumps({
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -137,7 +143,7 @@ def call_azure(deployment, user_message):
     }).encode("utf-8")
     req = urllib.request.Request(
         url, data=payload,
-        headers={"Content-Type": "application/json", "api-key": AZURE_API_KEY},
+        headers={"Content-Type": "application/json", "api-key": key},
     )
     try:
         with urllib.request.urlopen(req, timeout=60) as resp:
@@ -207,7 +213,8 @@ def call_google(model, user_message):
 
 # Model registry
 MODELS = [
-    ("GPT-4o", lambda msg: call_azure("gpt-4o", msg)),
+    ("GPT-4o (EastUS2)", lambda msg: call_azure("gpt-4o", msg)),
+    ("GPT-4o (Sweden)", lambda msg: call_azure("gpt-4o-2", msg, AZURE_SWEDEN_BASE, AZURE_SWEDEN_KEY)),
     ("GPT-4o-mini", lambda msg: call_azure("gpt-4o-mini", msg)),
     ("Claude-3.5-Sonnet", lambda msg: call_anthropic("claude-3-5-sonnet-20241022", msg)),
     ("Gemini-2.0-Flash", lambda msg: call_google("gemini-2.0-flash", msg)),
