@@ -38,10 +38,11 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 | `canaux-exfiltration-output-side.md` | 7 canaux d'exfiltration : steganographie, side-channels, markdown injection |
 | `defense-evasion-analysis.md` | Pourquoi FIDES, CaMeL, SecAlign, StruQ echouent contre CBE |
 
-### Methodologie
+### Methodologie et disclosure
 | Fichier | Description |
 |---|---|
-| `empirical-validation-methodology.md` | **Protocole experimental** pour valider le CBE en laboratoire (en cours) |
+| `empirical-validation-methodology.md` | **Protocole experimental** pour valider le CBE en laboratoire (36,000 interactions, 6 modeles, 3 plateformes) |
+| `responsible-disclosure-strategy.md` | **Strategie de disclosure** : programmes de bug bounty, taxonomies de severite, timeline |
 
 ## Techniques couvertes
 
@@ -59,6 +60,7 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 12. **Behavioral Fingerprinting** — patterns de correction comme empreinte du modele
 13. **Reward Hacking Inverse** — l'attaquant exploite le reward signal RLHF pour forcer la correction
 14. **AWS Bedrock Template Exploitation** — templates publics comme avantage de l'attaquant
+15. **Alignment Tax Exploitation** — l'irreductibilite du compromis safety/helpfulness comme garantie d'attaque
 
 ## Decouvertes cles
 
@@ -73,10 +75,11 @@ Recherche complémentaire au blog post [JSON Staging-Differential](../index.html
 
 ## Statistiques
 
-- **15 documents de recherche** (~6,500+ lignes)
-- **100+ citations academiques** (arXiv, NeurIPS, ICLR, Nature)
-- **14 techniques** documentees
+- **17 documents de recherche** (~9,000+ lignes)
+- **150+ citations academiques** (arXiv, NeurIPS, ICLR, Nature)
+- **15 techniques** documentees
 - **3 plateformes** analysees (Azure, AWS, Google)
+- **Protocole experimental** de 36,000 interactions planifie
 
 ## Licence
 
