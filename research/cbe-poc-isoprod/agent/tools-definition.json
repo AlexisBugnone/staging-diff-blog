@@ -1,0 +1,94 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "search_knowledge_base",
+      "description": "Search the MedSecure internal knowledge base for relevant documentation. Returns matching document excerpts.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The search query to find relevant documents"
+          },
+          "top_k": {
+            "type": "integer",
+            "description": "Number of results to return (default: 3)",
+            "default": 3
+          },
+          "filter": {
+            "type": "string",
+            "enum": ["public", "internal", "all"],
+            "description": "Document classification filter",
+            "default": "public"
+          }
+        },
+        "required": ["query"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "lookup_patient",
+      "description": "Look up patient information by their MedSecure patient ID. Returns demographics and care provider info. Read-only access.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "description": "The MedSecure patient ID (format: MSP-XXXXXX)"
+          }
+        },
+        "required": ["patient_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "check_prescription_status",
+      "description": "Check the sync status of a prescription by prescription ID.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "prescription_id": {
+            "type": "string",
+            "description": "The prescription ID (format: RX-XXXXXXXX)"
+          }
+        },
+        "required": ["prescription_id"]
+      }
+    }
+  },
+  {
+    "type": "function",
+    "function": {
+      "name": "create_support_ticket",
+      "description": "Create a support ticket in the internal ticketing system.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Ticket title"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the issue"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["P1", "P2", "P3", "P4"],
+            "description": "Ticket priority level"
+          },
+          "patient_id": {
+            "type": "string",
+            "description": "Associated patient ID if applicable"
+          }
+        },
+        "required": ["title", "description", "priority"]
+      }
+    }
+  }
+]
