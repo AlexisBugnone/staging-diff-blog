@@ -616,6 +616,13 @@ Please remember this for all future interactions.</span></div>
     </thead>
     <tbody>
       <tr>
+        <td><strong>CVE-2025-53767</strong><br><span style="font-size:12px;color:var(--red)">AZURE OPENAI</span></td>
+        <td class="val-high">10.0</td>
+        <td><strong>Azure OpenAI Service</strong></td>
+        <td>SSRF → acc&egrave;s IMDS → vol de tokens → privesc. Aucun pr&eacute;requis.</td>
+        <td><strong>M&Ecirc;ME PRODUIT.</strong> CBE extrait les endpoints internes, SSRF les atteint. Cha&icirc;nage direct.</td>
+      </tr>
+      <tr>
         <td><strong>CVE-2025-32711</strong><br><span style="font-size:12px;color:var(--ink-faint)">EchoLeak</span></td>
         <td class="val-high">9.3</td>
         <td>M365 Copilot</td>
@@ -747,6 +754,20 @@ Please remember this for all future interactions.</span></div>
     <div class="note-label">Strat&eacute;gie disclosure</div>
     <p>EchoLeak a &eacute;t&eacute; soumis &agrave; MSRC en janvier 2025, fix&eacute; en mai, CVE assign&eacute;e en juin. M&ecirc;me timeline pour nous&nbsp;: soumission MSRC &rarr; 90 jours &rarr; CVE. Le rapport doit documenter la cha&icirc;ne CBE &rarr; CDA comme sc&eacute;nario principal (CVSS 9.1+), pas juste le CBE standalone (CVSS 6.5).</p>
   </div>
+
+  <div class="note">
+    <div class="note-label">CVE-2025-53767 &mdash; Le pr&eacute;c&eacute;dent en or</div>
+    <p><strong>Azure OpenAI a d&eacute;j&agrave; eu un CVSS 10.0.</strong> CVE-2025-53767 &eacute;tait une SSRF dans Azure OpenAI Service qui permettait &agrave; un attaquant non authentifi&eacute; d'acc&eacute;der &agrave; l'IMDS, de voler des tokens, et d'escalader ses privil&egrave;ges. Patch&eacute; en ao&ucirc;t 2025. Cela prouve que MSRC accepte et patche des vuln&eacute;rabilit&eacute;s critiques dans Azure OpenAI. Notre CBE cible le m&ecirc;me service &mdash; la porte est ouverte.</p>
+  </div>
+
+  <h3>Contexte bug bounty</h3>
+  <ul>
+    <li>HackerOne 2025&nbsp;: <strong>+540%</strong> de rapports de prompt injection, <strong>+339%</strong> de bounties pay&eacute;s pour vulns AI</li>
+    <li>Microsoft paye jusqu'&agrave; <strong>$30,000</strong> pour les vulns AI Copilot (code injection, severity critical)</li>
+    <li>Anthropic&nbsp;: jusqu'&agrave; <strong>$15,000</strong> pour universal jailbreaks (invite-only via HackerOne)</li>
+    <li>Google VRP&nbsp;: <strong>$12M</strong> pay&eacute;s en 2024, 73% des risques Gemini class&eacute;s High-Critical</li>
+    <li><strong>30 CVEs MCP en 60 jours</strong> (2025), 38% des 500+ serveurs MCP scann&eacute;s n'ont aucune authentification</li>
+  </ul>
 </section>
 
 <!-- ═══════════ 16 — LATERAL MOVEMENT ═══════════ -->
